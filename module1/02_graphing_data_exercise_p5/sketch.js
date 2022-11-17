@@ -17,7 +17,7 @@ function setup() {
     let temp = 14 + row.getNum('Glob');
     let x = map(i, 0, table.getRowCount() - 1, 0, width);
     let y = map(temp, 13.5, 15, height, 0);
-    vertex(x, y);
+    ellipse(x, y,10,10);
   }
   endShape();
 }

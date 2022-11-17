@@ -4,38 +4,65 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>Coding Train: Data/APIs 1</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js" integrity="sha512-ElRFoEQdI5Ht6kZvyzXhYG9NqjtkmlkfYk0wr6wHxU9JEHakS7UJZNeml5ALk+8IKlU6jDgMabC3vkumRokgJA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <title>tgm chart</title>
+
   </head>
   <body>
-    <h1>Fetch Rainbows</h1>
+    <h1>AdaFruit IOT</h1>
+    <canvas id="myChart" width="400" height="200">  </canvas>
 
     <script>
-      console.log('about to fetch some rainbows');
-      const filenames = [
-        'images/daniele-levis-pelusi-311027-unsplash.jpg',
-        'images/guy-stevens-746794-unsplash.jpg',
-        'images/sharon-pittaway-98257-unsplash.jpg'
-      ];
+      const ctx = document.getElementById('myChart'); //.getContext('2d');
+      console.log('fetching feed');
+      let xyData = [];
+      d = {
+        labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+        datasets: [{
+            label: 'spa Temperature',
+            data: [],  //[{},{},{} /...]
+        }]
+        //data = []
+        //data.x = []
+    }
+    chartIt();
 
-      catchRainbows(filenames)
+      async function getAdafruitIO(feed,d) {
+        const response = await fetch("https://io.adafruit.com/api/v2/tgmcnaughton/feeds/tgmspa0/data/chart?hours=1");
+          const jStr = await response.text();
+          const rawAIO = JSON.parse(jStr);
+          console.log("RAW:",feed,rawAIO);
+          rawAIO.data.forEach(parseData);
+          console.log("Parsed:",feed,d.labels);
+          }
+
+      function parseData(item, index, arr) {
+        document.body.append(item+"... ");
+        d.datasets[0].data.push({"x": new Date(item[0]).getTime(), "y":item[1] });
+      }
+
+      async function chartIt(){
+        getAdafruitIO('tgmspa0')
         .then(response => {
-          console.log('yay');
+          console.log("called AdaIO");
         })
         .catch(error => {
-          console.log('error!');
+          console.log('error in AdaIO')
           console.error(error);
         });
-
-      async function catchRainbows(filenames) {
-        for (let filename of filenames) {
-          const response = await fetch(filename);
-          const blob = await response.blob();
-          const img = document.createElement('img');
-          img.src = URL.createObjectURL(blob);
-          img.width = '200';
-          document.body.append(img);
-        }
+        
+        const myChart = new Chart(ctx, {
+            type: 'scatter',
+            data: d,
+            options: {
+                scales: {
+                    y: {
+                        //beginAtZero: true
+                    }
+                }
+            }
+        });
       }
-    </script>
+      </script>    
   </body>
 </html>
